@@ -1,0 +1,158 @@
+    >>> import dpo
+    >>> import polib
+    >>> source = polib.pofile("dpo/tests/test.po")
+    >>> new = dpo.new_locale(source)
+
+If the source file entry contains a `msgstr`, it is considered the "source text"
+and reproduced exactly in the output entry's `msgstr` and translator comments.
+Extracted comments are preserved in the output.
+
+    >>> print source[0]
+    #. Exhaustive user testing demonstrated that in our installation of the 
+    #. software, 
+    #. account creation took between 20-55 seconds, so we had to change this
+    #. string 
+    #. to avoid lawsuits from disgruntled users.
+    #: utils.py:77
+    msgid ""
+    "You need to create an account first. Don't worry -- it only takes 15 "
+    "seconds!"
+    msgstr ""
+    "You need to create an account first. Don't worry -- it takes less than a "
+    "minute!"
+    <BLANKLINE>
+    >>> print new[0]
+    # ;; Source text ;;
+    # msgstr ""
+    # "You need to create an account first. Don't worry -- it takes less than a "
+    # "minute!"
+    # ;;
+    #. Exhaustive user testing demonstrated that in our installation of the 
+    #. software, 
+    #. account creation took between 20-55 seconds, so we had to change this
+    #. string 
+    #. to avoid lawsuits from disgruntled users.
+    #: utils.py:77
+    msgid ""
+    "You need to create an account first. Don't worry -- it only takes 15 "
+    "seconds!"
+    msgstr ""
+    "You need to create an account first. Don't worry -- it takes less than a "
+    "minute!"
+    <BLANKLINE>
+
+If the source text contained plural forms, these will all be reproduced exactly
+in the output's `msgstr` and comments:
+
+    >>> print new[-1]
+    # ;; Source text ;;
+    # msgstr[0] ""
+    # "\n"
+    # "    Showing %(num_actions)s project\n"
+    # "  "
+    # msgstr[1] ""
+    # "\n"
+    # "    Showing %(num_actions)s projects\n"
+    # "  "
+    # ;;
+    #: templates/action.html:50
+    #, python-format
+    msgid ""
+    "\n"
+    "    Showing %(num_actions)s action\n"
+    "  "
+    msgid_plural ""
+    "\n"
+    "    Showing %(num_actions)s actions\n"
+    "  "
+    msgstr[0] ""
+    "\n"
+    "    Showing %(num_actions)s project\n"
+    "  "
+    msgstr[1] ""
+    "\n"
+    "    Showing %(num_actions)s projects\n"
+    "  "
+    <BLANKLINE>
+    
+If no source text is present, the output entry will have a blank msgstr,
+and no comment:
+
+    >>> print new[2]
+    #: templates/home.html:15
+    #, python-format
+    msgid ""
+    "\n"
+    "%(SITE_NAME)s Contents\n"
+    msgstr ""
+    <BLANKLINE>
+
+Translators now have a PO file that they can work with.  
+
+    >>> import tempfile
+    >>> fd, path = tempfile.mkstemp(prefix="--dpo--doctest--", suffix=".po")
+    >>> new.save(path)
+    >>> pofile = polib.pofile(path)
+    >>> pofile[0].msgstr = u"Sie müssen zunächst ein Konto erstellen. Keine Sorge - es dauert weniger als eine Minute!"
+    >>> pofile[1].msgstr = u"Anfang"
+    >>> pofile[-1].msgstr_plural['1'] = "Revealing %(num_action)s items"
+
+If the translator edits a msgstr, it will be considered the new
+translation. If the translator does not edit a msgstr, dpo can detect
+this and strip the source text back out of the PO file when it
+reenters the dpo system.
+
+    >>> pofile.save(path)
+    >>> pofile = polib.pofile(path)
+    
+    >>> new = dpo.submit_locale(pofile)
+    >>> print new[0].msgstr
+    Sie müssen zunächst ein Konto erstellen. Keine Sorge - es dauert weniger als eine Minute!
+    >>> print new[1].msgstr
+    Anfang
+    >>> print new[3].msgstr
+    <BLANKLINE>
+
+The same logic should work for entries with plural forms:
+
+    >>> print new[-1]
+    # ;; Source text ;;
+    # msgstr[0] ""
+    # "\n"
+    # "    Showing %(num_actions)s project\n"
+    # "  "
+    # msgstr[1] ""
+    # "\n"
+    # "    Showing %(num_actions)s projects\n"
+    # "  "
+    # ;;
+    #: templates/action.html:50
+    #, python-format
+    msgid ""
+    "\n"
+    "    Showing %(num_actions)s action\n"
+    "  "
+    msgid_plural ""
+    "\n"
+    "    Showing %(num_actions)s actions\n"
+    "  "
+    msgstr[0] ""
+    msgstr[1] "Revealing %(num_action)s items"
+
+    >>> print new[-2]
+    #: templates/calendar.html:26
+    #, python-format
+    msgid ""
+    "\n"
+    "\t\t  %(days_till_event)s day remaining\n"
+    "\t\t  "
+    msgid_plural ""
+    "\n"
+    "\t\t  %(days_till_event)s days remaining\n"
+    "\t\t  "
+    msgstr[0] ""
+    msgstr[1] ""
+    <BLANKLINE>
+
+    >>> import os
+    >>> os.unlink(path)

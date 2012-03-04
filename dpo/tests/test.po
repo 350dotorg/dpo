@@ -1,0 +1,76 @@
+# Translations for Dpo Testing
+# Copyright (C) 2012 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the dpo package.
+# 
+# Translators:
+#   <ethan.jucovy@gmail.com>, 2011, 2012.
+#   <ejucovy@gmail.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: dpo\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-02-27 10:14-0500\n"
+"PO-Revision-Date: 2012-02-28 17:57+0000\n"
+"Last-Translator: <ethan.jucovy@gmail.com>\n"
+"Language-Team: English \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#. Exhaustive user testing demonstrated that in our installation of the software,
+#. account creation took between 20-55 seconds, so we had to change this string
+#. to avoid lawsuits from disgruntled users.
+#: utils.py:77
+msgid ""
+"You need to create an account first. Don't worry -- it only takes 15 "
+"seconds!"
+msgstr "You need to create an account first. Don't worry -- it takes less than a minute!"
+
+#: templates/base.html:6
+msgid "Home"
+msgstr ""
+
+#: templates/home.html:15
+#, python-format
+msgid ""
+"\n"
+"%(SITE_NAME)s Contents\n"
+msgstr ""
+
+#: templates/event.html:117
+msgid ""
+"\n"
+"\t    Click here to sign up for this event!\n"
+"\t    "
+msgstr ""
+"\n"
+"\t    Click here to attend this event!\n"
+"\t    "
+
+#: templates/calendar.html:26
+#, python-format
+msgid ""
+"\n"
+"\t\t  %(days_till_event)s day remaining\n"
+"\t\t  "
+msgid_plural ""
+"\n"
+"\t\t  %(days_till_event)s days remaining\n"
+"\t\t  "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/action.html:50
+#, python-format
+msgid ""
+"\n"
+"    Showing %(num_actions)s action\n"
+"  "
+msgid_plural ""
+"\n"
+"    Showing %(num_actions)s actions\n"
+"  "
+msgstr[0] "\n    Showing %(num_actions)s project\n  "
+msgstr[1] "\n    Showing %(num_actions)s projects\n  "
