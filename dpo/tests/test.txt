@@ -75,16 +75,59 @@ in the output's `msgstr` and comments:
     "  "
     <BLANKLINE>
     
-If no source text is present, the output entry will have a blank msgstr,
-and no comment:
+If no source text is present, the output entry will have a `msgstr` that is copied
+directly from the `msgid`.  This is because translators do not need to care whether
+the source text is overridden or not -- they just need to translate the source text
+wherever it came from.  So this way, they can always look in the same place for the
+source text.  Similarly, the output entry will have the source text reproduced in
+the comment, with an additional indicator that the source text was the `msgid`.
 
     >>> print new[2]
+    # ;; Source text ;;
+    # msgid ""
+    # "\n"
+    # "%(SITE_NAME)s Contents\n"
+    # ;;
     #: templates/home.html:15
     #, python-format
     msgid ""
     "\n"
     "%(SITE_NAME)s Contents\n"
     msgstr ""
+    "\n"
+    "%(SITE_NAME)s Contents\n"
+
+It will work for plurals, too:
+
+    >>> print new[-2]
+    # ;; Source text ;;
+    # msgid ""
+    # "\n"
+    # "\t\t  %(days_till_event)s day remaining\n"
+    # "\t\t  "
+    # msgid_plural ""
+    # "\n"
+    # "\t\t  %(days_till_event)s days remaining\n"
+    # "\t\t  "
+    # ;;
+    #: templates/calendar.html:26
+    #, python-format
+    msgid ""
+    "\n"
+    "\t\t  %(days_till_event)s day remaining\n"
+    "\t\t  "
+    msgid_plural ""
+    "\n"
+    "\t\t  %(days_till_event)s days remaining\n"
+    "\t\t  "
+    msgstr[0] ""
+    "\n"
+    "\t\t  %(days_till_event)s day remaining\n"
+    "\t\t  "
+    msgstr[1] ""
+    "\n"
+    "\t\t  %(days_till_event)s days remaining\n"
+    "\t\t  "
     <BLANKLINE>
 
 Translators now have a PO file that they can work with.  
@@ -96,6 +139,7 @@ Translators now have a PO file that they can work with.
     >>> pofile[0].msgstr = u"Sie müssen zunächst ein Konto erstellen. Keine Sorge - es dauert weniger als eine Minute!"
     >>> pofile[1].msgstr = u"Anfang"
     >>> pofile[-1].msgstr_plural['1'] = "Revealing %(num_action)s items"
+    >>> pofile[-2].msgstr_plural['0'] = "Today's the big day of the event!"
 
 If the translator edits a msgstr, it will be considered the new
 translation. If the translator does not edit a msgstr, dpo can detect
@@ -140,6 +184,16 @@ The same logic should work for entries with plural forms:
     msgstr[1] "Revealing %(num_action)s items"
 
     >>> print new[-2]
+    # ;; Source text ;;
+    # msgid ""
+    # "\n"
+    # "\t\t  %(days_till_event)s day remaining\n"
+    # "\t\t  "
+    # msgid_plural ""
+    # "\n"
+    # "\t\t  %(days_till_event)s days remaining\n"
+    # "\t\t  "
+    # ;;
     #: templates/calendar.html:26
     #, python-format
     msgid ""
@@ -150,7 +204,7 @@ The same logic should work for entries with plural forms:
     "\n"
     "\t\t  %(days_till_event)s days remaining\n"
     "\t\t  "
-    msgstr[0] ""
+    msgstr[0] "Today's the big day of the event!"
     msgstr[1] ""
     <BLANKLINE>
 

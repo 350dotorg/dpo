@@ -34,6 +34,23 @@ class DPOEntry(polib.POEntry):
         ret = polib.u("\n").join(ret)
         return ret
 
+def source_text(entry):
+    if not entry.tcomment:
+        return None
+    source_text = None
+    for line in entry.tcomment.splitlines():
+        if line.strip() == polib.u(";;"):
+            break
+        if source_text is not None:
+            source_text.append(line)
+        if line.strip() == polib.u(";; Source text ;;"):
+            source_text = []
+
+    if source_text and source_text[0].startswith("msgid"):
+        source_text = None
+
+    return source_text
+
 def unicode_with_source_msgstr(self, wrapwidth=78):
     """
     Returns the unicode representation of the entry.
@@ -116,25 +133,28 @@ def new_locale(source_pofile):
             else:
                 # otherwise write the msgstr
                 ret += new_entry._str_field("msgstr", "", "", new_entry.msgstr)
+
+            original_text = "\n".join(ret)
+            new_entry.dpo_comment = original_text
+
+        else:
+
+            ret = []
+            ret += new_entry._str_field("msgid", "", "", new_entry.msgid)
+
+            if new_entry.msgid_plural:
+                ret += new_entry._str_field("msgid_plural", "", "", new_entry.msgid_plural)
+                new_entry.msgstr_plural['0'] = new_entry.msgid
+                new_entry.msgstr_plural['1'] = new_entry.msgid_plural
+            else:
+                new_entry.msgstr = new_entry.msgid
+
             original_text = "\n".join(ret)
             new_entry.dpo_comment = original_text
 
         pofile.append(new_entry)
 
     return pofile
-
-def source_text(entry):
-    if not entry.tcomment:
-        return None
-    source_text = None
-    for line in entry.tcomment.splitlines():
-        if line.strip() == polib.u(";;"):
-            break
-        if source_text is not None:
-            source_text.append(line)
-        if line.strip() == polib.u(";; Source text ;;"):
-            source_text = []
-    return source_text
 
 def reconstruct_source_file(self):
     ret, headers = '', self.header.split('\n')
@@ -182,13 +202,18 @@ def submit_locale(pofile):
                 msgstrs = entry.msgstr_plural
                 keys = list(msgstrs)
                 keys.sort()
-                for index in keys:
+                for i, index in enumerate(keys):
                     if msgstrs[index] == source_entry.msgstr_plural[index]:
                         msgstrs[index] = ''
+                    else:
+                        if i == 0 and msgstrs[index] == source_entry.msgid:
+                            msgstrs[index] = ''
+                        elif msgstrs[index] == source_entry.msgid_plural:
+                            msgstrs[index] = ''
             else:
-                if entry.msgstr == source_entry.msgstr:
+                if entry.msgstr == source_entry.msgstr or entry.msgstr == source_entry.msgid:
                     entry.msgstr = ''
-
+                    
 
     os.unlink(path)
     del(fd)
@@ -198,5 +223,5 @@ if __name__ == '__main__':
     import doctest
     import os
     doctest.testfile(os.path.join("tests", "test.txt"), encoding="utf8",
-                     optionflags=doctest.REPORT_UDIFF | doctest.NORMALIZE_WHITESPACE)
+                     optionflags=doctest.REPORT_UDIFF | doctest.NORMALIZE_WHITESPACE | doctest.REPORT_ONLY_FIRST_FAILURE)
 
