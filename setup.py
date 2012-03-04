@@ -22,6 +22,7 @@ setup(name='dpo',
         "polib",
         ],
       entry_points="""
-      # -*- Entry points: -*-
+      [console_scripts]
+      dpo = dpo.console:main
       """,
       )
